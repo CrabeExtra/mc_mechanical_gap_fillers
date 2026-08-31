@@ -1,0 +1,13 @@
+{
+  "itemGroup.mechanicalgapfillers": "Example Mod Tab",
+  "block.mechanicalgapfillers.example_block": "Example Block",
+  "item.mechanicalgapfillers.example_item": "Example Item",
+
+  "mechanicalgapfillers.configuration.title": "Mechanical Gap Fillers Configs",
+  "mechanicalgapfillers.configuration.section.mechanicalgapfillers.common.toml": "Mechanical Gap Fillers Configs",
+  "mechanicalgapfillers.configuration.section.mechanicalgapfillers.common.toml.title": "Mechanical Gap Fillers Configs",
+  "mechanicalgapfillers.configuration.items": "Item List",
+  "mechanicalgapfillers.configuration.logDirtBlock": "Log Dirt Block",
+  "mechanicalgapfillers.configuration.magicNumberIntroduction": "Magic Number Text",
+  "mechanicalgapfillers.configuration.magicNumber": "Magic Number"
+}
