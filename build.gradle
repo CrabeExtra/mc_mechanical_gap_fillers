@@ -163,19 +163,21 @@ dependencies {
     implementation "curse.maven:applied-energistics2-223794:7027323"
     // AdvancedAE - Late-game AE2 multiblock addition used in ATM10
     implementation "curse.maven:advanced-ae-1084104:8564177"
+    implementation "curse.maven:guideme-1173950:6812025"
+    implementation "curse.maven:geckolib-388172:8309311"
 
     // Create Mod Core
     implementation "curse.maven:create-328085:7963363"
 
     // Core APIs needed for Create / UI rendering
-    implementation "curse.maven:architectury-api-419699:7339257"
-    implementation "curse.maven:cloth-config-348521:5987045"
+    implementation "curse.maven:architectury-api-419699:8492726"
+    implementation "curse.maven:cloth-config-348521:5729127"
 
     // Just Enough Items (JEI) - Essential for AE2 recipe integration
     implementation "curse.maven:jei-238222:8392171"
 
     // Searchables - Required if you want advanced terminal search bar filtering
-    implementation "curse.maven:searchables-858542:7348860"
+    implementation "curse.maven:searchables-858542:5831692"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

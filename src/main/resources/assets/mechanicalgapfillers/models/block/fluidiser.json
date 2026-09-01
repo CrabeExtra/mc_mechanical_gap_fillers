@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "mechanicalgapfillers:block/fluidiser/fluidiser_side",
+    "down": "mechanicalgapfillers:block/fluidiser/fluidiser_top_base",
+    "up": "mechanicalgapfillers:block/fluidiser/fluidiser_top_base",
+    "north": "mechanicalgapfillers:block/fluidiser/fluidiser_front_off",
+    "east": "mechanicalgapfillers:block/fluidiser/fluidiser_side",
+    "south": "mechanicalgapfillers:block/fluidiser/fluidiser_back",
+    "west": "mechanicalgapfillers:block/fluidiser/fluidiser_side"
+  }
+}

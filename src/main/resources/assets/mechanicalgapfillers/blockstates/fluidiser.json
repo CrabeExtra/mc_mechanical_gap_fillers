@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "mechanicalgapfillers:block/fluidiser" },
+    "facing=south": { "model": "mechanicalgapfillers:block/fluidiser", "y": 180 },
+    "facing=west":  { "model": "mechanicalgapfillers:block/fluidiser", "y": 270 },
+    "facing=east":  { "model": "mechanicalgapfillers:block/fluidiser", "y": 90 }
+  }
+}
