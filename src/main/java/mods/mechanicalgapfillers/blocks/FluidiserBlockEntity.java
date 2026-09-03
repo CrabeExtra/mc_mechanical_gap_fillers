@@ -215,8 +215,6 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
         return energyToAdd;
     }
 
-    // TODO: solve an error causing redstone blocks placed in the energy slot to subsequently count as dust and not be consumed.
-    //          Error also causes pulling redstone from the machine to provide energy.
     private void redstoneForPowerTickRun() {
         ItemStack energyInputStack = inventory.getStackInSlot(ENERGY_SLOT);
 
@@ -407,8 +405,8 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
                     this.setChangedAndUpdate();
                 }
 
-            }// TODO: add manual toggle, if switched, it expels the 1000mB of fluid to the nearest AE2 network. This
-            //      Would make for seamless interchange between blasting and splashing recipes.
+            }
+
         } else {
             if(progress != 0) {
                 this.setChangedAndUpdate();
