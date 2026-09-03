@@ -17,7 +17,10 @@ higher quality (and/or more) factories and hook them up to the system. More on s
 nicely with AE2 patterns. I had to treat them like storage and use filtered import and export buses, which meant I could
 only essentially 'start generating iron' or 'stop generating iron'. No 'generate 10 iron'.
 
-TODO: Electric generator to combo with create and mekanism?
+### TODO:
+ - Electric generator to combo with create and mekanism? This would convert rotation -> electrical energy.
+ - Add haunting via soul lava with the fluidiser for soul sand production for an infinite quartz crystal loop?
+ - Add upgrades. I want at least an upgrade for speed and for removing the random chance element from the splashing dice roll. 
 
 Boilerplate resources
 ===========

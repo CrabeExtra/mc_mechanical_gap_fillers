@@ -3,6 +3,9 @@ package mods.mechanicalgapfillers.blocks;
 import mods.mechanicalgapfillers.MechanicalGapFillers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -14,11 +17,14 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 import javax.annotation.Nullable;
 
 public class FluidiserBlock extends Block implements EntityBlock {
+
+    public static final IntegerProperty WORKING_STAGE = IntegerProperty.create("working_stage", 0, 4);
     // which direction is the block facing when placed.
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
@@ -26,6 +32,7 @@ public class FluidiserBlock extends Block implements EntityBlock {
         super(properties);
 
         this.registerDefaultState(this.getStateDefinition().any().setValue(FACING, Direction.NORTH));
+        this.registerDefaultState(this.stateDefinition.any().setValue(WORKING_STAGE, 0));
     }
 
     @Override
@@ -37,6 +44,7 @@ public class FluidiserBlock extends Block implements EntityBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
+        builder.add(WORKING_STAGE);
     }
 
     @Override
@@ -72,5 +80,36 @@ public class FluidiserBlock extends Block implements EntityBlock {
             }
         }
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+        int stage = state.getValue(WORKING_STAGE);
+        if (stage == 0) {
+            return;
+        }
+
+        int numParticles = stage == 2 || stage == 4 ? 10
+                : 2;
+
+        double x = pos.getX() + 0.5D;
+        double y = pos.getY() + 0.52D;
+        double z = pos.getZ() + 0.5D;
+
+        double spreadX = (random.nextDouble() - 0.5D) * 0.7D;
+        double spreadZ = (random.nextDouble() - 0.5D) * 0.7D;
+
+        double speedX = (random.nextDouble() - 0.5D) * 0.005D;
+        double speedY = 0.005D + (random.nextDouble() * 0.01D);
+        double speedZ = (random.nextDouble() - 0.5D) * 0.005D;
+
+        for(int i = 0; i < numParticles; i++) {
+            level.addParticle(
+                    new BlockParticleOption(ParticleTypes.BLOCK, state),
+                    x, y, z,
+                    speedX, speedY, speedZ
+            );
+        }
+
     }
 }

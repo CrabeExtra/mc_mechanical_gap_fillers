@@ -6,7 +6,7 @@ public class Joules {
         return fe * 2.5;
     }
 
-    public static double JToFe(int j) {
+    public static double jToFe(int j) {
         return j / 2.5;
     }
 }

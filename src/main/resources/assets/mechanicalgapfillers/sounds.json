@@ -1,0 +1,9 @@
+{
+  "fluidiser": {
+    "category": "blocks",
+    "subtitle": "subtitles.mechanicalgapfillers.fluidiser",
+    "sounds": [
+      "mechanicalgapfillers:fluidiser"
+    ]
+  }
+}

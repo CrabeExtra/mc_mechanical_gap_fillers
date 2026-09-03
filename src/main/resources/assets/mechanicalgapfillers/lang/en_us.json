@@ -1,6 +1,9 @@
 {
   "itemGroup.mechanicalgapfillers": "Mechanical Gap Fillers",
   "block.mechanicalgapfillers.fluidiser": "Fluidiser",
+  "gui.mechanicalgapfillers.fluidiser.fluidTank.empty": "Empty",
+  "gui.mechanicalgapfillers.fluidiser.fluidTank.info": "Add water or lava",
+  "gui.mechanicalgapfillers.fluidiser.energySlot.info": "Add redstone to power",
 
   "mechanicalgapfillers.configuration.title": "Mechanical Gap Fillers Configs",
   "mechanicalgapfillers.configuration.section.mechanicalgapfillers.common.toml": "Mechanical Gap Fillers Configs",

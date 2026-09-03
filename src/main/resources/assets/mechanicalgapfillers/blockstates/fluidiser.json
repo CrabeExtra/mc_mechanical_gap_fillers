@@ -1,8 +1,28 @@
 {
   "variants": {
-    "facing=north": { "model": "mechanicalgapfillers:block/fluidiser" },
-    "facing=south": { "model": "mechanicalgapfillers:block/fluidiser", "y": 180 },
-    "facing=west":  { "model": "mechanicalgapfillers:block/fluidiser", "y": 270 },
-    "facing=east":  { "model": "mechanicalgapfillers:block/fluidiser", "y": 90 }
+    "facing=north,working_stage=0": { "model": "mechanicalgapfillers:block/fluidiser_stage_0" },
+    "facing=east,working_stage=0":  { "model": "mechanicalgapfillers:block/fluidiser_stage_0", "y": 90 },
+    "facing=south,working_stage=0": { "model": "mechanicalgapfillers:block/fluidiser_stage_0", "y": 180 },
+    "facing=west,working_stage=0":  { "model": "mechanicalgapfillers:block/fluidiser_stage_0", "y": 270 },
+
+    "facing=north,working_stage=1": { "model": "mechanicalgapfillers:block/fluidiser_stage_1" },
+    "facing=east,working_stage=1":  { "model": "mechanicalgapfillers:block/fluidiser_stage_1", "y": 90 },
+    "facing=south,working_stage=1": { "model": "mechanicalgapfillers:block/fluidiser_stage_1", "y": 180 },
+    "facing=west,working_stage=1":  { "model": "mechanicalgapfillers:block/fluidiser_stage_1", "y": 270 },
+
+    "facing=north,working_stage=2": { "model": "mechanicalgapfillers:block/fluidiser_stage_2" },
+    "facing=east,working_stage=2":  { "model": "mechanicalgapfillers:block/fluidiser_stage_2", "y": 90 },
+    "facing=south,working_stage=2": { "model": "mechanicalgapfillers:block/fluidiser_stage_2", "y": 180 },
+    "facing=west,working_stage=2":  { "model": "mechanicalgapfillers:block/fluidiser_stage_2", "y": 270 },
+
+    "facing=north,working_stage=3": { "model": "mechanicalgapfillers:block/fluidiser_stage_3" },
+    "facing=east,working_stage=3":  { "model": "mechanicalgapfillers:block/fluidiser_stage_3", "y": 90 },
+    "facing=south,working_stage=3": { "model": "mechanicalgapfillers:block/fluidiser_stage_3", "y": 180 },
+    "facing=west,working_stage=3":  { "model": "mechanicalgapfillers:block/fluidiser_stage_3", "y": 270 },
+
+    "facing=north,working_stage=4": { "model": "mechanicalgapfillers:block/fluidiser_stage_4" },
+    "facing=east,working_stage=4":  { "model": "mechanicalgapfillers:block/fluidiser_stage_4", "y": 90 },
+    "facing=south,working_stage=4": { "model": "mechanicalgapfillers:block/fluidiser_stage_4", "y": 180 },
+    "facing=west,working_stage=4":  { "model": "mechanicalgapfillers:block/fluidiser_stage_4", "y": 270 }
   }
 }
