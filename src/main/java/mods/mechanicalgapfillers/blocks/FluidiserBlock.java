@@ -119,51 +119,19 @@ public class FluidiserBlock extends Block implements EntityBlock {
             );
         }
 
+        if (level.getGameTime() % 20 != 0) return;
+
+        double px = pos.getX() + 0.5D;
+        double py = pos.getY() + 0.5D;
+        double pz = pos.getZ() + 0.5D;
+
         if (stage == FluidiserBlockEntity.WATER_IDLE_STATE || stage == FluidiserBlockEntity.WATER_JET_STATE) {
-
-            // Play running sound
-            level.playSound(
-                    null,
-                    pos,
-                    FluidiserSounds.RUNNING_SOUND.get(),
-                    SoundSource.BLOCKS,
-                    0.5F,
-                    0.2F
-            );
-
-            level.playSound(
-                    null, pos,
-                    SoundEvents.WEATHER_RAIN,
-                    SoundSource.BLOCKS,
-                    0.8F, // Volume
-                    1.3F
-            );
+            level.playLocalSound(px, py, pz, FluidiserSounds.RUNNING_SOUND.get(), SoundSource.BLOCKS, 0.5F, 0.2F, false);
+            level.playLocalSound(px, py, pz, SoundEvents.WEATHER_RAIN, SoundSource.BLOCKS, 0.8F, 1.3F, false);
         } else if (stage == FluidiserBlockEntity.LAVA_IDLE_STATE || stage == FluidiserBlockEntity.LAVA_JET_STATE) {
-            // Play running sound
-            level.playSound(
-                    null,
-                    pos,
-                    FluidiserSounds.RUNNING_SOUND.get(),
-                    SoundSource.BLOCKS,
-                    0.5F,
-                    0.2F
-            );
-
-            level.playSound(
-                    null, pos,
-                    SoundEvents.LAVA_EXTINGUISH,
-                    SoundSource.BLOCKS,
-                    0.8F, // Volume
-                    1.3F
-            );
-
-            level.playSound(
-                    null, pos,
-                    SoundEvents.LAVA_AMBIENT,
-                    SoundSource.BLOCKS,
-                    0.8F, // Volume
-                    1.3F
-            );
+            level.playLocalSound(px, py, pz, FluidiserSounds.RUNNING_SOUND.get(), SoundSource.BLOCKS, 0.5F, 0.2F, false);
+            level.playLocalSound(px, py, pz, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.8F, 1.3F, false);
+            level.playLocalSound(px, py, pz, SoundEvents.LAVA_AMBIENT, SoundSource.BLOCKS, 0.8F, 1.3F, false);
         }
 
     }
