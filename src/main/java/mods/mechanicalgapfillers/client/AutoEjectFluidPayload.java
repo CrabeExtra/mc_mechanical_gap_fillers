@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public record AutoEjectFluidPayload(BlockPos pos, boolean enabled) implements CustomPacketPayload {
     public static final Type<AutoEjectFluidPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(MechanicalGapFillers.MODID, "set_checkbox_state"));
+            new Type<>(ResourceLocation.fromNamespaceAndPath(MechanicalGapFillers.MODID, "set_auto_eject_fluid"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, AutoEjectFluidPayload> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC, AutoEjectFluidPayload::pos,

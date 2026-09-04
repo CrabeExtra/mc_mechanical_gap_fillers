@@ -4,7 +4,10 @@
   "gui.mechanicalgapfillers.fluidiser.fluidTank.empty": "Empty",
   "gui.mechanicalgapfillers.fluidiser.fluidTank.info": "Add water or lava",
   "gui.mechanicalgapfillers.fluidiser.energySlot.info": "Add redstone to power",
-
+  "item.mechanicalgapfillers.speed_upgrade": "MGF Speed Upgrade",
+  "item.mechanicalgapfillers.deterministic_upgrade":"MGF Deterministic Upgrade",
+  "tooltip.mechanicalgapfillers.speed_upgrade": "Increases MGF machine processing speed.",
+  "tooltip.mechanicalgapfillers.deterministic_upgrade": "Removes random chance and provides 100% chance of an output.",
   "mechanicalgapfillers.configuration.title": "Mechanical Gap Fillers Configs",
   "mechanicalgapfillers.configuration.section.mechanicalgapfillers.common.toml": "Mechanical Gap Fillers Configs",
   "mechanicalgapfillers.configuration.section.mechanicalgapfillers.common.toml.title": "Mechanical Gap Fillers Configs",

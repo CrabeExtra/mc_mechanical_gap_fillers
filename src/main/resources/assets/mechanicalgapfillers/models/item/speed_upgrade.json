@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "mechanicalgapfillers:item/upgrades/speed_upgrade"
+  }
+}

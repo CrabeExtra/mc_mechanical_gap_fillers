@@ -1,5 +1,6 @@
 package mods.mechanicalgapfillers;
 
+import mods.mechanicalgapfillers.blocks.MGFBlocks;
 import mods.mechanicalgapfillers.client.FluidiserScreen;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
@@ -26,7 +27,7 @@ public class MechanicalGapFillersClient {
 
     @SubscribeEvent
     public static void registerScreens(RegisterMenuScreensEvent event) {
-        event.register(MechanicalGapFillers.FLUIDISER_MENU.get(), FluidiserScreen::new);
+        event.register(MGFBlocks.FLUIDISER_MENU.get(), FluidiserScreen::new);
     }
 
 }

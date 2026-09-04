@@ -1,13 +1,18 @@
 package mods.mechanicalgapfillers.blocks;
 
 import mods.mechanicalgapfillers.MechanicalGapFillers;
+import mods.mechanicalgapfillers.items.UpgradeItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
@@ -63,7 +68,7 @@ public class FluidiserBlock extends Block implements EntityBlock {
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         if (level.isClientSide()) return null;
 
-        return type == MechanicalGapFillers.FLUIDISER_BLOCK_ENTITY.get() ? (lvl, pos, st, be) -> {
+        return type == MGFBlocks.FLUIDISER_BLOCK_ENTITY.get() ? (lvl, pos, st, be) -> {
             if (be instanceof FluidiserBlockEntity fluidiserBe) {
                 FluidiserBlockEntity.serverTick(lvl, pos, st, fluidiserBe);
             }

@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SB",
+    "IG"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "S": {
+      "item": "ae2:silicon"
+    },
+    "G": {
+      "item": "minecraft:raw_gold"
+    },
+    "B": {
+      "item": "minecraft:blaze_powder"
+    }
+  },
+  "result": {
+    "id": "mechanicalgapfillers:speed_upgrade",
+    "count": 1
+  }
+}

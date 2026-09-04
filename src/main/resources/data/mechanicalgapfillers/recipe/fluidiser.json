@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CEC",
+    "GST",
+    "CIC"
+  ],
+  "key": {
+    "S": {
+      "item": "mekanism:steel_casing"
+    },
+    "T": {
+      "item": "mekanism:basic_fluid_tank"
+    },
+    "E": {
+      "item": "ae2:engineering_processor"
+    },
+    "G": {
+      "item": "ae2:quartz_glass"
+    },
+    "C": {
+      "item": "mekanism:advanced_control_circuit"
+    },
+    "I": {
+      "item": "mekanism:ingot_steel"
+    }
+  },
+  "result": {
+    "id": "mechanicalgapfillers:fluidiser",
+    "count": 1
+  }
+}

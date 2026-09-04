@@ -93,7 +93,7 @@ public class FluidiserScreen extends AbstractContainerScreen<FluidiserMenu> {
             10, 10,
             EJECT_BUTTON_TEXTURE,
             button -> {
-                // TODO: once upgrades are created, make this eject code.
+                PacketDistributor.sendToServer(new EjectUpgradesPayload());
             }
         );
 

@@ -37,7 +37,7 @@ public class FluidiserMenu extends AbstractContainerMenu {
     }
 
     public FluidiserMenu(int containerId, Inventory playerInv, FluidiserBlockEntity entity, ContainerData data) {
-        super(MechanicalGapFillers.FLUIDISER_MENU.get(), containerId);
+        super(MGFBlocks.FLUIDISER_MENU.get(), containerId);
 
         this.blockEntity = entity instanceof FluidiserBlockEntity ? (FluidiserBlockEntity) entity : null;
         this.data = this.blockEntity != null ? this.blockEntity.data : new SimpleContainerData(FluidiserBlockEntity.DATA_COUNT);

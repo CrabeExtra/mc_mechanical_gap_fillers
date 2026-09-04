@@ -4,6 +4,8 @@ package mods.mechanicalgapfillers.blocks;
 import com.simibubi.create.AllRecipeTypes;
 import com.simibubi.create.content.kinetics.fan.processing.SplashingRecipe;
 import mods.mechanicalgapfillers.MechanicalGapFillers;
+import mods.mechanicalgapfillers.items.MGFItems;
+import mods.mechanicalgapfillers.items.UpgradeItem;
 import mods.mechanicalgapfillers.sounds.FluidiserSounds;
 import mods.mechanicalgapfillers.utility.energy.MGFEnergyStorage;
 import net.minecraft.core.BlockPos;
@@ -17,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -29,6 +32,7 @@ import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -41,7 +45,7 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.*;
 
 public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
     public static final int PROGRESS_DATA = 0;
@@ -66,8 +70,11 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
 
     public final MGFEnergyStorage energyStorage = new MGFEnergyStorage(MAX_ENERGY_STORAGE, MAX_ENERGY_STORAGE, MAX_ENERGY_STORAGE);
 
+    public final HashSet<UpgradeItem.UpgradeType> upgrades = new HashSet<>();
+
     private boolean updateFluidMenu = false;
-    public boolean autoEjectFluid = false; // the user could simply list the non-consumed fluid as an output as well as input, but people dont always think of that.
+    public boolean autoEjectFluid = true;
+
     public final FluidTank fluidTank = new FluidTank(1000) {
         @Override
         protected void onContentsChanged() {
@@ -175,7 +182,7 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
 
 
     public FluidiserBlockEntity(BlockPos pos, BlockState state) {
-        super(MechanicalGapFillers.FLUIDISER_BLOCK_ENTITY.get(), pos, state);
+        super(MGFBlocks.FLUIDISER_BLOCK_ENTITY.get(), pos, state);
     }
 
     private boolean isSplashable(ItemStack stack, Level level) {
@@ -233,7 +240,7 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
     private void handleMachineOperationRunning() {
         double secondsToProcess = fluidTank.getFluidInTank(0).is(Fluids.LAVA) ? 5 // 5 second baseline, keep in mind this needs to be balanced, otherwise iron generation would be very fast indeed.
                 : fluidTank.getFluidInTank(0).is(Fluids.WATER) ? 2 // 2 second baseline, will create upgraded factory versions that are quicker.
-                : 0;
+                : -1;
         double ticksPerSecond = 20;
         double totalPowerRequiredForOneOperation = 4000;
         double maxProgress = 100;
@@ -243,8 +250,21 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
         int powerDrawPerTick = (int) Math.floor(totalPowerRequiredForOneOperation / totalTicksRequired);
         double incrementPerTick = maxProgress / totalTicksRequired;
 
-        progress += incrementPerTick;
-        energyStorage.extractEnergy(powerDrawPerTick, false);
+        // speed upgrades also draw more power.
+        if(upgrades.contains(UpgradeItem.UpgradeType.SPEED)) {
+            incrementPerTick *= 4;
+            powerDrawPerTick *= 4;
+        }
+        // I know I'm already checking earlier if it has the minimum amount of energy, I do need to clean up this code.
+        // Wrote all this very speedily.
+        if (energyStorage.extractEnergy(powerDrawPerTick, true) == powerDrawPerTick) {
+            progress += incrementPerTick;
+            energyStorage.extractEnergy(powerDrawPerTick, false);
+
+        } else {
+            progress = 0;
+        }
+
     }
 
     private void handleMachineSoundsAndTextureChange(BlockPos pos, BlockState state) {
@@ -325,7 +345,8 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
             }
         }
     }
-
+    // TODO: this code could be cleaned up. In fact this whole java class could do with some refactoring.
+    //      LOOOOT of duplicated code below, dont judge, I just want to play the game.
     private void handleMachineOperationTickRun() {
         ItemStack inputStack = inventory.getStackInSlot(INPUT_SLOT);
         ItemStack outputOne = inventory.getStackInSlot(OUTPUT_SLOT_1);
@@ -357,28 +378,53 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
                 handleMachineOperationRunning();
 
                 if(progress >= 100) {
-                    List<ItemStack> outputs = splashingRecipe.rollResults(this.level.getRandom());
 
-                    for (ItemStack o : outputs) {
-                        if (o.getItem() == potentialResults.get(0).getItem()) {
-                            if (!outputOne.isEmpty()) {
-                                outputOne.grow(o.getCount());
-                            } else {
-                                ItemStack newOutputOne = new ItemStack(o.getItem(), o.getCount());
-                                this.inventory.insertItem(OUTPUT_SLOT_1, newOutputOne, false);
-                            }
+                    if(upgrades.contains(UpgradeItem.UpgradeType.DETERMINISTIC)) {
+                        ItemStack ResultOne = potentialResults.get(0);
+                        ItemStack ResultTwo = potentialResults.get(1);
+
+                        if (!outputOne.isEmpty()) {
+                            outputOne.grow(ResultOne.getCount());
                         } else {
-                            if (!outputTwo.isEmpty()) {
-                                outputTwo.grow(o.getCount());
+                            ItemStack newOutputOne = new ItemStack(ResultOne.getItem(), ResultOne.getCount());
+                            this.inventory.insertItem(OUTPUT_SLOT_1, newOutputOne, false);
+                        }
+
+                        if (!outputTwo.isEmpty()) {
+                            outputTwo.grow(ResultTwo.getCount());
+                        } else {
+                            ItemStack newOutputTwo = new ItemStack(ResultTwo.getItem(), ResultTwo.getCount());
+                            this.inventory.insertItem(OUTPUT_SLOT_2, newOutputTwo, false);
+                        }
+                    } else {
+                        List<ItemStack> outputs = splashingRecipe.rollResults(this.level.getRandom());
+                        for (ItemStack o : outputs) {
+                            if (o.getItem() == potentialResults.get(0).getItem()) {
+                                if (!outputOne.isEmpty()) {
+                                    outputOne.grow(o.getCount());
+                                } else {
+                                    ItemStack newOutputOne = new ItemStack(o.getItem(), o.getCount());
+                                    this.inventory.insertItem(OUTPUT_SLOT_1, newOutputOne, false);
+                                }
                             } else {
-                                ItemStack newOutputTwo = new ItemStack(o.getItem(), o.getCount());
-                                this.inventory.insertItem(OUTPUT_SLOT_2, newOutputTwo, false);
+                                if (!outputTwo.isEmpty()) {
+                                    outputTwo.grow(o.getCount());
+                                } else {
+                                    ItemStack newOutputTwo = new ItemStack(o.getItem(), o.getCount());
+                                    this.inventory.insertItem(OUTPUT_SLOT_2, newOutputTwo, false);
+                                }
                             }
                         }
                     }
 
-                    inputStack.shrink(1);
 
+                    inputStack.shrink(1);
+                    if (progress >= 100) {
+                        // Retain overflow progress so leftover fraction isn't wasted
+                        progress -= 100;
+                    } else {
+                        progress = 0;
+                    }
                     progress = 0;
                     this.setChangedAndUpdate();
                     ejectOutput();
@@ -401,8 +447,16 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
                         ItemStack newOutputOne = new ItemStack(result.getItem(), result.getCount());
                         this.inventory.insertItem(OUTPUT_SLOT_1, newOutputOne, false);
                     }
-                    progress = 0;
+
+                    if (progress >= 100) {
+                        // Retain overflow progress so leftover fraction isn't wasted
+                        progress -= 100;
+                    } else {
+                        progress = 0;
+                    }
+
                     this.setChangedAndUpdate();
+                    ejectOutput();
                 }
 
             }
@@ -595,6 +649,33 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
         }
     }
 
+    public boolean addUpgrade(UpgradeItem.UpgradeType upgrade, Player player, ItemStack stack) {
 
+        if(upgrades.contains(upgrade)) return false;
+
+        if(!player.hasInfiniteMaterials()) {
+            stack.shrink(1);
+        }
+        upgrades.add(upgrade);
+        return true;
+    }
+
+    public void removeUpgrades() {
+
+        for(UpgradeItem.UpgradeType upgradeType : upgrades) {
+            ItemStack upgradeStack = new ItemStack(upgradeType.getItem(), 1);
+            if (this.level != null && !this.level.isClientSide()) {
+
+                Containers.dropItemStack(
+                        this.level,
+                        this.worldPosition.getX(),
+                        this.worldPosition.getY(),
+                        this.worldPosition.getZ(),
+                        upgradeStack
+                );
+            }
+        }
+        upgrades.clear();
+    }
 
 }
