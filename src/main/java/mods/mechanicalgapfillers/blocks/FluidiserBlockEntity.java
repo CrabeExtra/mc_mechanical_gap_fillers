@@ -68,7 +68,12 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
     public static final int LAVA_JET_STATE = 4;
     public static final int LAVA_IDLE_STATE = 3;
 
-    public final MGFEnergyStorage energyStorage = new MGFEnergyStorage(MAX_ENERGY_STORAGE, MAX_ENERGY_STORAGE, MAX_ENERGY_STORAGE);
+    public final MGFEnergyStorage energyStorage = new MGFEnergyStorage(MAX_ENERGY_STORAGE, MAX_ENERGY_STORAGE, MAX_ENERGY_STORAGE) {
+        @Override
+        public boolean canReceive() {
+            return true;
+        }
+    };
 
     public final HashSet<UpgradeItem.UpgradeType> upgrades = new HashSet<>();
 

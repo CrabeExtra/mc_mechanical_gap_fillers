@@ -1,25 +1,21 @@
 package mods.mechanicalgapfillers.blocks;
 
-import mods.mechanicalgapfillers.sounds.FluidiserSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
-import mods.mechanicalgapfillers.MechanicalGapFillers;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.SlotItemHandler;
+import org.jetbrains.annotations.NotNull;
 
 public class FluidiserMenu extends AbstractContainerMenu {
 
@@ -196,13 +192,60 @@ public class FluidiserMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public ItemStack quickMoveStack(Player player, int index) {
-        // Required method handling shift-clicking rules for safety
-        return ItemStack.EMPTY;
+    public @NotNull ItemStack quickMoveStack(Player player, int index) {
+        ItemStack itemstack = ItemStack.EMPTY;
+        Slot slot = this.slots.get(index);
+
+        if (slot != null && slot.hasItem()) {
+            ItemStack itemstack1 = slot.getItem();
+            itemstack = itemstack1.copy();
+
+            // Total number of machine container slots
+            final int MACHINE_SLOTS = 4;
+
+            final int INPUT_SLOT = FluidiserBlockEntity.INPUT_SLOT;
+            final int ENERGY_SLOT = FluidiserBlockEntity.ENERGY_SLOT;
+
+            if (index < MACHINE_SLOTS) {
+                if (!this.moveItemStackTo(itemstack1, MACHINE_SLOTS, this.slots.size(), true)) {
+                    return ItemStack.EMPTY;
+                }
+                slot.onQuickCraft(itemstack1, itemstack);
+            }
+
+            else {
+                if (itemstack1.is(Items.REDSTONE) || itemstack1.is(Items.REDSTONE_BLOCK)) {
+                    if (!this.moveItemStackTo(itemstack1, ENERGY_SLOT, ENERGY_SLOT + 1, false)) {
+                        return ItemStack.EMPTY;
+                    }
+                }
+
+                else {
+                    if (!this.moveItemStackTo(itemstack1, INPUT_SLOT, INPUT_SLOT + 1, false)) {
+                        return ItemStack.EMPTY;
+                    }
+                }
+            }
+
+            if (itemstack1.isEmpty()) {
+                slot.setByPlayer(ItemStack.EMPTY);
+            } else {
+                slot.setChanged();
+            }
+
+            if (itemstack1.getCount() == itemstack.getCount()) {
+                return ItemStack.EMPTY;
+            }
+
+            slot.onTake(player, itemstack1);
+        }
+
+        return itemstack;
     }
 
     @Override
     public boolean stillValid(Player player) {
         return true;
     }
+
 }

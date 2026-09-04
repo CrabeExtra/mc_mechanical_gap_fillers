@@ -16,7 +16,7 @@ public class CapabilityEvents {
 
         event.registerBlockEntity(
                 Capabilities.EnergyStorage.BLOCK,
-                MGFBlocks.FLUIDISER_BLOCK_ENTITY.get(), // Ensure this matches your BE DeferredHolder
+                MGFBlocks.FLUIDISER_BLOCK_ENTITY.get(),
                 (blockEntity, side) -> blockEntity.energyStorage
         );
 

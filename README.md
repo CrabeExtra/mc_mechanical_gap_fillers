@@ -20,7 +20,9 @@ only essentially 'start generating iron' or 'stop generating iron'. No 'generate
 ### TODO:
  - Electric generator to combo with create and mekanism? This would convert rotation -> electrical energy.
  - Add haunting via soul lava with the fluidiser for soul sand production for an infinite quartz crystal loop?
- - Add upgrades. I want at least an upgrade for speed and for removing the random chance element from the splashing dice roll. 
+ - More upgrade types.
+ - Add a generic machine block so that I can extend its functionality and not have to re-write things.
+ - add 'right click automatically drops items to player inventory'.
 
 Boilerplate resources
 ===========
