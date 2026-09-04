@@ -196,23 +196,7 @@ public class FluidiserScreen extends AbstractContainerScreen<FluidiserMenu> {
             guiGraphics.renderComponentTooltip(this.font, tooltip, mouseX - x, mouseY - y);
         }
 
-        // progress bar label.
-        int progX = x + 76;
-        int progY = y + 40;
-        int progWidth = 21;
-        int progHeight = 7;
 
-        if(!fluidiserBe.fluidTank.isEmpty() && mouseX >= progX && mouseX < progX + progWidth && mouseY >= progY && mouseY < progY + progHeight) {
-
-            // create tooltip
-            List<Component> tooltip = new ArrayList<>();
-
-            // add as tooltip.
-            tooltip.add(Component.literal("Click to view recipes"));
-
-            // render.
-            guiGraphics.renderComponentTooltip(this.font, tooltip, mouseX - x, mouseY - y);
-        }
     }
 
     @Override
