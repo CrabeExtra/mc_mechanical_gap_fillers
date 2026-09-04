@@ -1,21 +1,12 @@
 package mods.mechanicalgapfillers.blocks;
 
-import mods.mechanicalgapfillers.MechanicalGapFillers;
-import mods.mechanicalgapfillers.items.UpgradeItem;
-import mods.mechanicalgapfillers.sounds.FluidiserSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
@@ -27,6 +18,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
@@ -68,14 +60,20 @@ public class FluidiserBlock extends Block implements EntityBlock {
 
     @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        if (level.isClientSide()) return null;
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, @NotNull BlockState state, @NotNull BlockEntityType<T> type) {
+        if (type != MGFBlocks.FLUIDISER_BLOCK_ENTITY.get()) {
+            return null;
+        }
 
-        return type == MGFBlocks.FLUIDISER_BLOCK_ENTITY.get() ? (lvl, pos, st, be) -> {
+        return (lvl, pos, st, be) -> {
             if (be instanceof FluidiserBlockEntity fluidiserBe) {
-                FluidiserBlockEntity.serverTick(lvl, pos, st, fluidiserBe);
+                if (lvl.isClientSide()) {
+                    FluidiserBlockEntity.clientTick(lvl, pos, st, fluidiserBe);
+                } else {
+                    FluidiserBlockEntity.serverTick(lvl, pos, st, fluidiserBe);
+                }
             }
-        } : null;
+        };
     }
 
     @Override
@@ -90,8 +88,9 @@ public class FluidiserBlock extends Block implements EntityBlock {
         return InteractionResult.SUCCESS;
     }
 
+    // TODO: might move this code to a per-tick function so it's more consistent
     @Override
-    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+    public void animateTick(BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull RandomSource random) {
         int stage = state.getValue(WORKING_STAGE);
         if (stage == 0) {
             return;
@@ -104,9 +103,6 @@ public class FluidiserBlock extends Block implements EntityBlock {
         double y = pos.getY() + 0.52D;
         double z = pos.getZ() + 0.5D;
 
-        double spreadX = (random.nextDouble() - 0.5D) * 0.7D;
-        double spreadZ = (random.nextDouble() - 0.5D) * 0.7D;
-
         double speedX = (random.nextDouble() - 0.5D) * 0.005D;
         double speedY = 0.005D + (random.nextDouble() * 0.01D);
         double speedZ = (random.nextDouble() - 0.5D) * 0.005D;
@@ -117,21 +113,6 @@ public class FluidiserBlock extends Block implements EntityBlock {
                     x, y, z,
                     speedX, speedY, speedZ
             );
-        }
-
-        if (level.getGameTime() % 20 != 0) return;
-
-        double px = pos.getX() + 0.5D;
-        double py = pos.getY() + 0.5D;
-        double pz = pos.getZ() + 0.5D;
-
-        if (stage == FluidiserBlockEntity.WATER_IDLE_STATE || stage == FluidiserBlockEntity.WATER_JET_STATE) {
-            level.playLocalSound(px, py, pz, FluidiserSounds.RUNNING_SOUND.get(), SoundSource.BLOCKS, 0.5F, 0.2F, false);
-            level.playLocalSound(px, py, pz, SoundEvents.WEATHER_RAIN, SoundSource.BLOCKS, 0.8F, 1.3F, false);
-        } else if (stage == FluidiserBlockEntity.LAVA_IDLE_STATE || stage == FluidiserBlockEntity.LAVA_JET_STATE) {
-            level.playLocalSound(px, py, pz, FluidiserSounds.RUNNING_SOUND.get(), SoundSource.BLOCKS, 0.5F, 0.2F, false);
-            level.playLocalSound(px, py, pz, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.8F, 1.3F, false);
-            level.playLocalSound(px, py, pz, SoundEvents.LAVA_AMBIENT, SoundSource.BLOCKS, 0.8F, 1.3F, false);
         }
 
     }

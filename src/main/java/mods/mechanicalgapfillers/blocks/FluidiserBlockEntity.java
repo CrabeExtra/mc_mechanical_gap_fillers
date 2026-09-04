@@ -272,6 +272,32 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
 
     }
 
+    public static void clientTick(Level level, BlockPos pos, BlockState state, FluidiserBlockEntity blockEntity) {
+        if (!blockEntity.isRunning()) {
+            blockEntity.soundTimer = 0;
+            return;
+        }
+
+        // Runs exactly once every 20 client ticks (1 second)
+        if (blockEntity.soundTimer % 20 == 0) {
+            int stage = state.getValue(FluidiserBlock.WORKING_STAGE);
+
+            if (stage == WATER_IDLE_STATE || stage == WATER_JET_STATE) {
+                level.playLocalSound(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                        FluidiserSounds.RUNNING_SOUND.get(), SoundSource.BLOCKS, 0.5F, 0.2F, false);
+                level.playLocalSound(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                        SoundEvents.WEATHER_RAIN, SoundSource.BLOCKS, 0.8F, 1.3F, false);
+            } else if (stage == LAVA_IDLE_STATE || stage == LAVA_JET_STATE) {
+                level.playLocalSound(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                        FluidiserSounds.RUNNING_SOUND.get(), SoundSource.BLOCKS, 0.5F, 0.2F, false);
+                level.playLocalSound(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                        SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.8F, 1.3F, false);
+            }
+        }
+
+        blockEntity.soundTimer++;
+    }
+
     private void handleMachineSoundsAndTextureChange(BlockPos pos, BlockState state) {
         if (this.level == null || this.level.isClientSide()) return;
 
