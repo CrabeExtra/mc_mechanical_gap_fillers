@@ -1,7 +1,6 @@
 package mods.mechanicalgapfillers.blocks;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.SimpleContainer;
@@ -120,11 +119,6 @@ public class FluidiserMenu extends AbstractContainerMenu {
                         new FluidStack(Fluids.WATER, 1000),
                         IFluidHandler.FluidAction.EXECUTE
                     );
-
-                    Minecraft.getInstance().getSoundManager().play(
-                        SimpleSoundInstance.forUI(SoundEvents.BUCKET_FILL, 1.0F) // Pitch: 1.0F
-                    );
-
                     fluidiserBe.setChangedAndUpdate();
 
                     if(cursorItem.getCount() > 1) {
@@ -141,10 +135,6 @@ public class FluidiserMenu extends AbstractContainerMenu {
                     fluidiserBe.fluidTank.drain(
                         new FluidStack(Fluids.LAVA, 1000),
                         IFluidHandler.FluidAction.EXECUTE
-                    );
-
-                    Minecraft.getInstance().getSoundManager().play(
-                        SimpleSoundInstance.forUI(SoundEvents.BUCKET_FILL_LAVA, 1.0F) // Pitch: 1.0F
                     );
 
                     fluidiserBe.setChangedAndUpdate();
@@ -169,16 +159,6 @@ public class FluidiserMenu extends AbstractContainerMenu {
                             new FluidStack(fluidInBucket, 1000),
                             IFluidHandler.FluidAction.EXECUTE
                     );
-
-                    if(fluidInBucket.equals(Fluids.WATER)) {
-                        Minecraft.getInstance().getSoundManager().play(
-                            SimpleSoundInstance.forUI(SoundEvents.BUCKET_EMPTY, 1.0F) // Pitch: 1.0F
-                        );
-                    } else if(fluidInBucket.equals(Fluids.LAVA)) { // is currently always true but I might add soul lava later for haunting effect >:)
-                        Minecraft.getInstance().getSoundManager().play(
-                            SimpleSoundInstance.forUI(SoundEvents.BUCKET_EMPTY_LAVA, 1.0F) // Pitch: 1.0F
-                        );
-                    }
 
                     fluidiserBe.setChangedAndUpdate();
 

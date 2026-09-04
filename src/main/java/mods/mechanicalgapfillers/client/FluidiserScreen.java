@@ -3,6 +3,7 @@ package mods.mechanicalgapfillers.client;
 import mods.mechanicalgapfillers.blocks.FluidiserBlockEntity;
 import mods.mechanicalgapfillers.utility.energy.Joules;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ImageButton;
@@ -10,13 +11,18 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import mods.mechanicalgapfillers.blocks.FluidiserMenu;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.energy.EnergyStorage;
 import net.neoforged.neoforge.fluids.FluidType;
@@ -197,6 +203,44 @@ public class FluidiserScreen extends AbstractContainerScreen<FluidiserMenu> {
         }
 
 
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        // Check if the user clicked the slot area matching x=142, y=62
+        if (this.hoveredSlot != null && this.hoveredSlot.x == 142 && this.hoveredSlot.y == 62) {
+            ItemStack cursorItem = this.menu.getCarried();
+
+            if (this.menu.getBlockEntity() instanceof FluidiserBlockEntity fluidiserBe) {
+                var fluidInTank = fluidiserBe.fluidTank.getFluidInTank(0).getFluid();
+
+                // 1. Draining Water
+                if (fluidInTank.equals(Fluids.WATER) && cursorItem.is(Items.BUCKET)) {
+                    Minecraft.getInstance().getSoundManager().play(
+                            SimpleSoundInstance.forUI(SoundEvents.BUCKET_FILL, 1.0F)
+                    );
+                    // 2. Draining Lava
+                } else if (fluidInTank.equals(Fluids.LAVA) && cursorItem.is(Items.BUCKET)) {
+                    Minecraft.getInstance().getSoundManager().play(
+                            SimpleSoundInstance.forUI(SoundEvents.BUCKET_FILL_LAVA, 1.0F)
+                    );
+                    // 3. Filling Tank
+                } else if (fluidiserBe.fluidTank.isEmpty()) {
+                    if (cursorItem.is(Items.WATER_BUCKET)) {
+                        Minecraft.getInstance().getSoundManager().play(
+                                SimpleSoundInstance.forUI(SoundEvents.BUCKET_EMPTY, 1.0F)
+                        );
+                    } else if (cursorItem.is(Items.LAVA_BUCKET)) {
+                        Minecraft.getInstance().getSoundManager().play(
+                                SimpleSoundInstance.forUI(SoundEvents.BUCKET_EMPTY_LAVA, 1.0F)
+                        );
+                    }
+                }
+            }
+        }
+
+        // Always delegate to super so Minecraft forwards the slot click event to FluidiserMenu!
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
