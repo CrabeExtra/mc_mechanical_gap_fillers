@@ -2,11 +2,14 @@ package mods.mechanicalgapfillers.blocks;
 
 import mods.mechanicalgapfillers.MechanicalGapFillers;
 import mods.mechanicalgapfillers.items.UpgradeItem;
+import mods.mechanicalgapfillers.sounds.FluidiserSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -113,6 +116,53 @@ public class FluidiserBlock extends Block implements EntityBlock {
                     new BlockParticleOption(ParticleTypes.BLOCK, state),
                     x, y, z,
                     speedX, speedY, speedZ
+            );
+        }
+
+        if (stage == FluidiserBlockEntity.WATER_IDLE_STATE || stage == FluidiserBlockEntity.WATER_JET_STATE) {
+
+            // Play running sound
+            level.playSound(
+                    null,
+                    pos,
+                    FluidiserSounds.RUNNING_SOUND.get(),
+                    SoundSource.BLOCKS,
+                    0.5F,
+                    0.2F
+            );
+
+            level.playSound(
+                    null, pos,
+                    SoundEvents.WEATHER_RAIN,
+                    SoundSource.BLOCKS,
+                    0.8F, // Volume
+                    1.3F
+            );
+        } else if (stage == FluidiserBlockEntity.LAVA_IDLE_STATE || stage == FluidiserBlockEntity.LAVA_JET_STATE) {
+            // Play running sound
+            level.playSound(
+                    null,
+                    pos,
+                    FluidiserSounds.RUNNING_SOUND.get(),
+                    SoundSource.BLOCKS,
+                    0.5F,
+                    0.2F
+            );
+
+            level.playSound(
+                    null, pos,
+                    SoundEvents.LAVA_EXTINGUISH,
+                    SoundSource.BLOCKS,
+                    0.8F, // Volume
+                    1.3F
+            );
+
+            level.playSound(
+                    null, pos,
+                    SoundEvents.LAVA_AMBIENT,
+                    SoundSource.BLOCKS,
+                    0.8F, // Volume
+                    1.3F
             );
         }
 

@@ -273,62 +273,20 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     private void handleMachineSoundsAndTextureChange(BlockPos pos, BlockState state) {
+        if (this.level == null || this.level.isClientSide()) return;
 
         soundCooldown--;
 
         if (isRunning() && soundCooldown <= 0) {
+            Fluid currentFluid = fluidTank.getFluidInTank(0).getFluid();
 
-            if(fluidTank.getFluidInTank(0).getFluid() == Fluids.LAVA) {
-                if (soundTimer % 20 == 0) {
-
+            if (currentFluid == Fluids.LAVA) {
+                if (soundTimer % 20 == 0 && state.getValue(FluidiserBlock.WORKING_STAGE) != LAVA_JET_STATE) {
                     level.setBlock(pos, state.setValue(FluidiserBlock.WORKING_STAGE, LAVA_JET_STATE), 3);
-                    // Play running sound
-                    level.playSound(
-                        null,
-                        pos,
-                        FluidiserSounds.RUNNING_SOUND.get(),
-                        SoundSource.BLOCKS,
-                        0.5F,
-                        0.2F
-                    );
-
-                    level.playSound(
-                        null, pos,
-                        SoundEvents.LAVA_EXTINGUISH,
-                        SoundSource.BLOCKS,
-                        0.8F, // Volume
-                        1.3F
-                    );
-
-                    level.playSound(
-                        null, pos,
-                        SoundEvents.LAVA_AMBIENT,
-                        SoundSource.BLOCKS,
-                        0.8F, // Volume
-                        1.3F
-                    );
                 }
-            } else if(fluidTank.getFluidInTank(0).getFluid() == Fluids.WATER) {
-                // Loop interval based on your sound file duration (e.g. 40 ticks = 2 seconds)
-                if (soundTimer % 20 == 0) {
+            } else if (currentFluid == Fluids.WATER) {
+                if (soundTimer % 20 == 0 && state.getValue(FluidiserBlock.WORKING_STAGE) != WATER_JET_STATE) {
                     level.setBlock(pos, state.setValue(FluidiserBlock.WORKING_STAGE, WATER_JET_STATE), 3);
-                    // Play running sound
-                    level.playSound(
-                        null,
-                        pos,
-                        FluidiserSounds.RUNNING_SOUND.get(),
-                        SoundSource.BLOCKS,
-                        0.5F,
-                        0.2F
-                    );
-
-                    level.playSound(
-                        null, pos,
-                        SoundEvents.WEATHER_RAIN,
-                        SoundSource.BLOCKS,
-                        0.8F, // Volume
-                        1.3F
-                    );
                 }
             }
 
@@ -338,18 +296,23 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
             soundTimer = 0; // Reset when inactive
         }
 
-        if(soundCooldown <= 0) {
-            level.setBlock(pos, state.setValue(FluidiserBlock.WORKING_STAGE, OFF_STATE), 3);
-        } else if(soundCooldown < 10) {
-            if(fluidTank.getFluidInTank(0).getFluid() == Fluids.WATER) {
+        if (soundCooldown <= 0) {
+            if (state.getValue(FluidiserBlock.WORKING_STAGE) != OFF_STATE) {
+                level.setBlock(pos, state.setValue(FluidiserBlock.WORKING_STAGE, OFF_STATE), 3);
+            }
+        } else if (soundCooldown < 10) {
+            Fluid currentFluid = fluidTank.getFluidInTank(0).getFluid();
+
+            if (currentFluid == Fluids.WATER && state.getValue(FluidiserBlock.WORKING_STAGE) != WATER_IDLE_STATE) {
                 level.setBlock(pos, state.setValue(FluidiserBlock.WORKING_STAGE, WATER_IDLE_STATE), 3);
             }
 
-            if(fluidTank.getFluidInTank(0).getFluid() == Fluids.LAVA) {
+            if (currentFluid == Fluids.LAVA && state.getValue(FluidiserBlock.WORKING_STAGE) != LAVA_IDLE_STATE) {
                 level.setBlock(pos, state.setValue(FluidiserBlock.WORKING_STAGE, LAVA_IDLE_STATE), 3);
             }
         }
     }
+
     // TODO: this code could be cleaned up. In fact this whole java class could do with some refactoring.
     //      LOOOOT of duplicated code below, dont judge, I just want to play the game.
     private void handleMachineOperationTickRun() {
