@@ -5,8 +5,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
@@ -17,7 +19,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.BlockHitResult;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -86,6 +92,57 @@ public class FluidiserBlock extends Block implements EntityBlock {
             }
         }
         return InteractionResult.SUCCESS;
+    }
+
+    private void dropItemHandlerContents(Level level, BlockPos pos, IItemHandler itemHandler) {
+        for (int i = 0; i < itemHandler.getSlots(); i++) {
+            ItemStack stack = itemHandler.getStackInSlot(i);
+            if (!stack.isEmpty()) {
+                Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stack.copy());
+            }
+        }
+    }
+
+    /// do NOT break the block while it still has lava in the tank this will be a catastrophic blunder
+    public void handleFluidDrop(Level level, BlockPos pos, FluidTank fluidTank) {
+        if (level == null || level.isClientSide()) return;
+
+        FluidStack fluidInTank = fluidTank.getFluidInTank(0);
+
+        if (fluidInTank.getAmount() > 0) {
+            Fluid fluid = fluidInTank.getFluid();
+            BlockState fluidState = fluid.defaultFluidState().createLegacyBlock();
+
+            if (!fluidState.isEmpty()) {
+                // Replaces the block location with the fluid block (e.g., Lava block)
+                level.setBlock(pos, fluidState, 3);
+            }
+        }
+    }
+
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+
+        if (!state.is(newState.getBlock())) {
+            BlockEntity blockEntity = level.getBlockEntity(pos);
+            if (blockEntity instanceof FluidiserBlockEntity fluidiserBe) {
+
+                // drop inventory on destruction of block.
+                dropItemHandlerContents(level, pos, fluidiserBe.inventory);
+
+                // AND drop upgrades:
+                fluidiserBe.removeUpgrades();
+
+                // AND fluid (we do conserve matter here, I haven't finished studying quantum phys)
+                handleFluidDrop(level, pos, fluidiserBe.fluidTank);
+
+                level.updateNeighbourForOutputSignal(pos, this);
+            }
+
+            super.onRemove(state, level, pos, newState, isMoving);
+        } else {
+            super.onRemove(state, level, pos, newState, isMoving);
+        }
     }
 
     // TODO: might move this code to a per-tick function so it's more consistent

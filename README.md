@@ -18,7 +18,6 @@ nicely with AE2 patterns. I had to treat them like storage and use filtered impo
 only essentially 'start generating iron' or 'stop generating iron'. No 'generate 10 iron'.
 
 
-
 Boilerplate resources
 ===========
 
