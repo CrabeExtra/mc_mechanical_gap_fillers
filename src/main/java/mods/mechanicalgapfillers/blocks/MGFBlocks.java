@@ -1,7 +1,10 @@
 package mods.mechanicalgapfillers.blocks;
 
+import mods.mechanicalgapfillers.fluids.MGFFluids;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -41,4 +44,8 @@ public class MGFBlocks {
 
     public static final DeferredHolder<MenuType<?>, MenuType<FluidiserMenu>> FLUIDISER_MENU =
             MENUS.register("fluidiser_menu", () -> IMenuTypeExtension.create(FluidiserMenu::new));
+
+
+    public static final DeferredHolder<Block, LiquidBlock> SOUL_WATER_BLOCK = MGFBlocks.BLOCKS.register("soul_water",
+            () -> new LiquidBlock(MGFFluids.SOUL_WATER_SOURCE.get(), BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.WATER)));
 }

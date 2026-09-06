@@ -8,6 +8,8 @@
   "item.mechanicalgapfillers.deterministic_upgrade":"MGF Deterministic Upgrade",
   "tooltip.mechanicalgapfillers.speed_upgrade": "Increases MGF machine processing speed.",
   "tooltip.mechanicalgapfillers.deterministic_upgrade": "Removes random chance and provides 100% chance of an output.",
+  "fluid.mechanicalgapfillers.soul_water": "Soul Water",
+  "item.mechanicalgapfillers.soul_water_bucket": "Soul Water Bucket",
   "mechanicalgapfillers.configuration.title": "Mechanical Gap Fillers Configs",
   "mechanicalgapfillers.configuration.section.mechanicalgapfillers.common.toml": "Mechanical Gap Fillers Configs",
   "mechanicalgapfillers.configuration.section.mechanicalgapfillers.common.toml.title": "Mechanical Gap Fillers Configs",

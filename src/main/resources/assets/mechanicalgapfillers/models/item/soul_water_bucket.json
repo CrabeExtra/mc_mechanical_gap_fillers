@@ -1,0 +1,5 @@
+{
+  "parent": "neoforge:item/bucket",
+  "fluid": "mechanicalgapfillers:soul_water_source",
+  "loader":"neoforge:fluid_container"
+}

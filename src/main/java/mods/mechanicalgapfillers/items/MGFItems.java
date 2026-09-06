@@ -1,12 +1,16 @@
 package mods.mechanicalgapfillers.items;
 
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import static mods.mechanicalgapfillers.MechanicalGapFillers.FluidiserName;
 import static mods.mechanicalgapfillers.MechanicalGapFillers.MODID;
+import mods.mechanicalgapfillers.fluids.MGFFluids;
+
 import mods.mechanicalgapfillers.blocks.MGFBlocks;
 
 public class MGFItems {
@@ -23,4 +27,7 @@ public class MGFItems {
 
     // Fluidiser item
     public static final DeferredItem<BlockItem> FLUIDISER_ITEM = ITEMS.registerSimpleBlockItem(FluidiserName, MGFBlocks.FLUIDISER_BLOCK);
+
+    public static final DeferredItem<Item> SOUL_WATER_BUCKET = MGFItems.ITEMS.register("soul_water_bucket",
+            () -> new BucketItem(MGFFluids.SOUL_WATER_SOURCE.get(), new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
 }

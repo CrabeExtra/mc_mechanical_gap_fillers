@@ -4,7 +4,9 @@ import mods.mechanicalgapfillers.blocks.FluidiserBlock;
 import mods.mechanicalgapfillers.blocks.FluidiserBlockEntity;
 import mods.mechanicalgapfillers.blocks.FluidiserMenu;
 import mods.mechanicalgapfillers.blocks.MGFBlocks;
+import mods.mechanicalgapfillers.client.ClientSetup;
 import mods.mechanicalgapfillers.client.EjectUpgradesPayload;
+import mods.mechanicalgapfillers.fluids.MGFFluids;
 import mods.mechanicalgapfillers.items.MGFItems;
 import mods.mechanicalgapfillers.items.UpgradeItem;
 import mods.mechanicalgapfillers.recipes.MGFRecipes;
@@ -12,6 +14,10 @@ import mods.mechanicalgapfillers.sounds.FluidiserSounds;
 import mods.mechanicalgapfillers.client.AutoEjectFluidPayload;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -56,6 +62,7 @@ public class MechanicalGapFillers {
                 output.accept(MGFItems.FLUIDISER_ITEM.get()); // Add the example item to the tab. For your own tabs, this method is preferred over the event
                 output.accept(MGFItems.SPEED_UPGRADE.get());
                 output.accept(MGFItems.DETERMINISTIC_UPGRADE.get());
+                output.accept(MGFItems.SOUL_WATER_BUCKET.get());
             }).build());
 
     // The constructor for the mod class is the first code that is run when your mod is loaded.
@@ -70,6 +77,9 @@ public class MechanicalGapFillers {
         // Register the Deferred Register to the mod event bus so blocks get registered
         MGFBlocks.BLOCKS.register(modEventBus);
 
+        MGFFluids.FLUID_TYPES.register(modEventBus);
+        MGFFluids.FLUIDS.register(modEventBus);
+
         // Register the Deferred Register to the mod event bus so items get registered
         MGFItems.ITEMS.register(modEventBus);
 
@@ -77,6 +87,11 @@ public class MechanicalGapFillers {
         MGFBlocks.BLOCK_ENTITIES.register(modEventBus);
 
         MGFRecipes.RECIPE_SERIALIZERS.register(modEventBus);
+
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            modEventBus.addListener(ClientSetup::registerClientExtensions);
+            modEventBus.addListener(ClientSetup::registerItemColors);
+        }
 
         // Register the Deferred Register to the mod event bus so tabs get registered
         CREATIVE_MODE_TABS.register(modEventBus);

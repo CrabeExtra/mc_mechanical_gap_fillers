@@ -1,5 +1,6 @@
 package mods.mechanicalgapfillers.integration.jei;
 
+import com.simibubi.create.content.kinetics.fan.processing.HauntingRecipe;
 import com.simibubi.create.content.kinetics.fan.processing.SplashingRecipe;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
@@ -28,9 +29,6 @@ import java.util.List;
 @JeiPlugin
 public class FluidiserJEIPlugin implements IModPlugin {
 
-    public static final RecipeType<Object> CREATE_SPLASHING =
-            RecipeType.create("create", "splashing", Object.class);
-
     @Override
     public @NotNull ResourceLocation getPluginUid() {
         return ResourceLocation.fromNamespaceAndPath(MechanicalGapFillers.MODID, "jei_plugin");
@@ -44,6 +42,8 @@ public class FluidiserJEIPlugin implements IModPlugin {
 
         // Create Splashing (using JEI RecipeType)
         registration.addRecipeCatalyst(new ItemStack(MGFBlocks.FLUIDISER_BLOCK.get()), FluidiserSplashingCategory.TYPE);
+
+        registration.addRecipeCatalyst(new ItemStack(MGFBlocks.FLUIDISER_BLOCK.get()), FluidiserHauntingCategory.TYPE);
     }
 
     @Override
@@ -52,6 +52,8 @@ public class FluidiserJEIPlugin implements IModPlugin {
         registration.addRecipeCategories(new FluidiserSplashingCategory(registration.getJeiHelpers().getGuiHelper()));
 
         registration.addRecipeCategories(new FluidiserBlastingCategory(registration.getJeiHelpers().getGuiHelper()));
+
+        registration.addRecipeCategories(new FluidiserHauntingCategory(registration.getJeiHelpers().getGuiHelper()));
     }
 
     @Override
@@ -93,6 +95,22 @@ public class FluidiserJEIPlugin implements IModPlugin {
                 registration.addRecipes(FluidiserBlastingCategory.TYPE, blastingRecipes);
             }
         });
+
+        var hauntingTypeOpt = BuiltInRegistries.RECIPE_TYPE.getOptional(
+                ResourceLocation.fromNamespaceAndPath("create", "haunting")
+        );
+
+        hauntingTypeOpt.ifPresent(hauntingType -> {
+            // Fetch recipes and extract the inner value from RecipeHolder
+            List<HauntingRecipe> hauntingRecipes = recipeManager.getAllRecipesFor((net.minecraft.world.item.crafting.RecipeType<HauntingRecipe>) hauntingType)
+                    .stream()
+                    .map(RecipeHolder::value)
+                    .toList();
+
+            if (!hauntingRecipes.isEmpty()) {
+                registration.addRecipes(FluidiserHauntingCategory.TYPE, hauntingRecipes);
+            }
+        });
     }
 
     @Override
@@ -101,6 +119,13 @@ public class FluidiserJEIPlugin implements IModPlugin {
         int progY = 40;
         int progWidth = 21;
         int progHeight = 7;
-        registration.addRecipeClickArea(FluidiserScreen.class, progX, progY, progWidth, progHeight, RecipeTypes.BLASTING);
+
+        registration.addRecipeClickArea(
+                FluidiserScreen.class,
+                progX, progY, progWidth, progHeight,
+                FluidiserSplashingCategory.TYPE,
+                FluidiserBlastingCategory.TYPE,
+                FluidiserHauntingCategory.TYPE
+        );
     }
 }

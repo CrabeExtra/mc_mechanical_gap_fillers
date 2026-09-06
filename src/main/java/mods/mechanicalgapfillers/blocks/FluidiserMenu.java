@@ -1,5 +1,7 @@
 package mods.mechanicalgapfillers.blocks;
 
+import mods.mechanicalgapfillers.fluids.MGFFluids;
+import mods.mechanicalgapfillers.items.MGFItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.sounds.SoundEvents;
@@ -146,18 +148,36 @@ public class FluidiserMenu extends AbstractContainerMenu {
                     this.setCarried(new ItemStack(Items.LAVA_BUCKET));
                     return;
                     // if tank empty, add bucket fluid to tank if lava or water.
+                } else if(fluidiserBe.fluidTank.getFluidInTank(0).is(MGFFluids.SOUL_WATER_SOURCE.get())) {
+                    if(!cursorItem.is(Items.BUCKET)) return;
+
+                    fluidiserBe.fluidTank.drain(
+                        new FluidStack(MGFFluids.SOUL_WATER_SOURCE.get(), 1000),
+                        IFluidHandler.FluidAction.EXECUTE
+                    );
+
+                    fluidiserBe.setChangedAndUpdate();
+
+                    if(cursorItem.getCount() > 1) {
+                        giveItemToPlayer(player, new ItemStack(Items.BUCKET, cursorItem.getCount() - 1));
+                    }
+
+                    this.setCarried(new ItemStack(MGFItems.SOUL_WATER_BUCKET.get()));
+
+                    return;
                 } else if(fluidiserBe.fluidTank.isEmpty()) {
                     Fluid fluidInBucket =
                             cursorItem.is(Items.WATER_BUCKET)  ? Fluids.WATER
                             : cursorItem.is(Items.LAVA_BUCKET) ? Fluids.LAVA
+                            : cursorItem.is(MGFItems.SOUL_WATER_BUCKET) ? MGFFluids.SOUL_WATER_SOURCE.get()
                             : Fluids.EMPTY;
 
                     if(fluidInBucket.equals(Fluids.EMPTY)) return;
 
                     // Fill the tank with exactly 1000mB (1 Bucket)
                     fluidiserBe.fluidTank.fill(
-                            new FluidStack(fluidInBucket, 1000),
-                            IFluidHandler.FluidAction.EXECUTE
+                        new FluidStack(fluidInBucket, 1000),
+                        IFluidHandler.FluidAction.EXECUTE
                     );
 
                     fluidiserBe.setChangedAndUpdate();

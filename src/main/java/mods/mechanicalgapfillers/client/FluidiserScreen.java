@@ -1,6 +1,8 @@
 package mods.mechanicalgapfillers.client;
 
 import mods.mechanicalgapfillers.blocks.FluidiserBlockEntity;
+import mods.mechanicalgapfillers.fluids.MGFFluids;
+import mods.mechanicalgapfillers.items.MGFItems;
 import mods.mechanicalgapfillers.utility.energy.Joules;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -214,18 +216,23 @@ public class FluidiserScreen extends AbstractContainerScreen<FluidiserMenu> {
             if (this.menu.getBlockEntity() instanceof FluidiserBlockEntity fluidiserBe) {
                 var fluidInTank = fluidiserBe.fluidTank.getFluidInTank(0).getFluid();
 
-                // 1. Draining Water
-                if (fluidInTank.equals(Fluids.WATER) && cursorItem.is(Items.BUCKET)) {
+
+                if ((fluidInTank.equals(Fluids.WATER) && cursorItem.is(Items.BUCKET))) {
                     Minecraft.getInstance().getSoundManager().play(
                             SimpleSoundInstance.forUI(SoundEvents.BUCKET_FILL, 1.0F)
                     );
-                    // 2. Draining Lava
+
                 } else if (fluidInTank.equals(Fluids.LAVA) && cursorItem.is(Items.BUCKET)) {
                     Minecraft.getInstance().getSoundManager().play(
                             SimpleSoundInstance.forUI(SoundEvents.BUCKET_FILL_LAVA, 1.0F)
                     );
-                    // 3. Filling Tank
-                } else if (fluidiserBe.fluidTank.isEmpty()) {
+
+                } else if (fluidInTank.equals(MGFFluids.SOUL_WATER_SOURCE.get()) && cursorItem.is(Items.BUCKET)) {
+                    Minecraft.getInstance().getSoundManager().play(
+                            SimpleSoundInstance.forUI(SoundEvents.BUCKET_FILL, 2.0F)
+                    );
+                }
+                else if (fluidiserBe.fluidTank.isEmpty()) {
                     if (cursorItem.is(Items.WATER_BUCKET)) {
                         Minecraft.getInstance().getSoundManager().play(
                                 SimpleSoundInstance.forUI(SoundEvents.BUCKET_EMPTY, 1.0F)
@@ -233,6 +240,10 @@ public class FluidiserScreen extends AbstractContainerScreen<FluidiserMenu> {
                     } else if (cursorItem.is(Items.LAVA_BUCKET)) {
                         Minecraft.getInstance().getSoundManager().play(
                                 SimpleSoundInstance.forUI(SoundEvents.BUCKET_EMPTY_LAVA, 1.0F)
+                        );
+                    } else if(cursorItem.is(MGFItems.SOUL_WATER_BUCKET.get())) {
+                        Minecraft.getInstance().getSoundManager().play(
+                                SimpleSoundInstance.forUI(SoundEvents.BUCKET_EMPTY, 2.0F)
                         );
                     }
                 }

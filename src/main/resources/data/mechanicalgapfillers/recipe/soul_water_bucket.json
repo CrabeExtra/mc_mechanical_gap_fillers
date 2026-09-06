@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "WS"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:water_bucket"
+    },
+    "W": {
+      "item": "minecraft:soul_campfire"
+    }
+  },
+  "result": {
+    "id": "mechanicalgapfillers:soul_water_bucket",
+    "count": 1
+  }
+}

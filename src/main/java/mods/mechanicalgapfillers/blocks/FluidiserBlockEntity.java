@@ -2,8 +2,12 @@
 package mods.mechanicalgapfillers.blocks;
 
 import com.simibubi.create.AllRecipeTypes;
+import com.simibubi.create.content.kinetics.fan.processing.HauntingRecipe;
 import com.simibubi.create.content.kinetics.fan.processing.SplashingRecipe;
+import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
+import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
 import mods.mechanicalgapfillers.MechanicalGapFillers;
+import mods.mechanicalgapfillers.fluids.MGFFluids;
 import mods.mechanicalgapfillers.items.MGFItems;
 import mods.mechanicalgapfillers.items.UpgradeItem;
 import mods.mechanicalgapfillers.sounds.FluidiserSounds;
@@ -12,6 +16,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -190,7 +197,7 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
         super(MGFBlocks.FLUIDISER_BLOCK_ENTITY.get(), pos, state);
     }
 
-    private boolean isSplashable(ItemStack stack, Level level) {
+    public boolean isSplashable(ItemStack stack, Level level) {
         if (stack.isEmpty()) return false;
 
         // In 1.21.1, recipes use input wrappers rather than raw Container wrappers
@@ -201,7 +208,7 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
                 .isPresent();
     }
 
-    private boolean isBlastable(ItemStack stack, Level level) {
+    public boolean isBlastable(ItemStack stack, Level level) {
         if (stack.isEmpty()) return false;
 
         SingleRecipeInput input = new SingleRecipeInput(stack);
@@ -245,7 +252,9 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
     private void handleMachineOperationRunning() {
         double secondsToProcess = fluidTank.getFluidInTank(0).is(Fluids.LAVA) ? 5 // 5 second baseline, keep in mind this needs to be balanced, otherwise iron generation would be very fast indeed.
                 : fluidTank.getFluidInTank(0).is(Fluids.WATER) ? 2 // 2 second baseline, will create upgraded factory versions that are quicker.
+                : fluidTank.getFluidInTank(0).is(MGFFluids.SOUL_WATER_SOURCE.get()) ? 5
                 : -1;
+
         double ticksPerSecond = 20;
         double totalPowerRequiredForOneOperation = 4000;
         double maxProgress = 100;
@@ -260,6 +269,7 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
             incrementPerTick *= 4;
             powerDrawPerTick *= 4;
         }
+
         // I know I'm already checking earlier if it has the minimum amount of energy, I do need to clean up this code.
         // Wrote all this very speedily.
         if (energyStorage.extractEnergy(powerDrawPerTick, true) == powerDrawPerTick) {
@@ -310,7 +320,7 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
                 if (soundTimer % 20 == 0 && state.getValue(FluidiserBlock.WORKING_STAGE) != LAVA_JET_STATE) {
                     level.setBlock(pos, state.setValue(FluidiserBlock.WORKING_STAGE, LAVA_JET_STATE), 3);
                 }
-            } else if (currentFluid == Fluids.WATER) {
+            } else if (currentFluid == Fluids.WATER || currentFluid == MGFFluids.SOUL_WATER_SOURCE.get()) {
                 if (soundTimer % 20 == 0 && state.getValue(FluidiserBlock.WORKING_STAGE) != WATER_JET_STATE) {
                     level.setBlock(pos, state.setValue(FluidiserBlock.WORKING_STAGE, WATER_JET_STATE), 3);
                 }
@@ -329,7 +339,7 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
         } else if (soundCooldown < 10) {
             Fluid currentFluid = fluidTank.getFluidInTank(0).getFluid();
 
-            if (currentFluid == Fluids.WATER && state.getValue(FluidiserBlock.WORKING_STAGE) != WATER_IDLE_STATE) {
+            if ((currentFluid == Fluids.WATER || currentFluid == MGFFluids.SOUL_WATER_SOURCE.get()) && state.getValue(FluidiserBlock.WORKING_STAGE) != WATER_IDLE_STATE) {
                 level.setBlock(pos, state.setValue(FluidiserBlock.WORKING_STAGE, WATER_IDLE_STATE), 3);
             }
 
@@ -337,6 +347,41 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
                 level.setBlock(pos, state.setValue(FluidiserBlock.WORKING_STAGE, LAVA_IDLE_STATE), 3);
             }
         }
+    }
+    // handles splashing and haunting.
+    private void rollCreateRecipe(ProcessingRecipe<?, ?> recipe, ItemStack targetPrimary, ItemStack targetSecondary, ItemStack inputStack) {
+        List<ItemStack> outputsToInsert = upgrades.contains(UpgradeItem.UpgradeType.DETERMINISTIC)
+                ? recipe.getRollableResultsAsItemStacks().stream().map(ItemStack::copy).toList()
+                : recipe.rollResults(this.level.getRandom());
+
+        for (ItemStack stack : outputsToInsert) {
+            if (stack.isEmpty()) continue;
+
+            if (ItemStack.isSameItemSameComponents(stack, targetPrimary)) {
+                // Primary output strictly to Slot 1
+                this.inventory.insertItem(OUTPUT_SLOT_1, stack.copy(), false);
+            } else if (!targetSecondary.isEmpty() && ItemStack.isSameItemSameComponents(stack, targetSecondary)) {
+                // Secondary output strictly to Slot 2
+                this.inventory.insertItem(OUTPUT_SLOT_2, stack.copy(), false);
+            } else {
+                // Unexpected byproducts/extra drops eject directly into the world
+                if (this.level != null && !this.level.isClientSide) {
+                    Containers.dropItemStack(
+                        this.level,
+                        this.worldPosition.getX() + 0.5,
+                        this.worldPosition.getY() + 1.1, // Drops just above the block top
+                        this.worldPosition.getZ() + 0.5,
+                        stack.copy()
+                    );
+                }
+            }
+        }
+
+        inputStack.shrink(1);
+        progress = Math.max(0, progress - 100);
+
+        this.setChangedAndUpdate();
+        ejectOutput();
     }
 
     // TODO: this code could be cleaned up. In fact this whole java class could do with some refactoring.
@@ -350,7 +395,8 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
         SingleRecipeInput recipeInput = new SingleRecipeInput(inputStack);
         var recipeOpt = fluidType == Fluids.WATER
                 ? level.getRecipeManager().getRecipeFor(AllRecipeTypes.SPLASHING.getType(), recipeInput, level)
-                : level.getRecipeManager().getRecipeFor(RecipeType.BLASTING, recipeInput, level);
+                : fluidType == Fluids.LAVA ? level.getRecipeManager().getRecipeFor(RecipeType.BLASTING, recipeInput, level)
+                : level.getRecipeManager().getRecipeFor(AllRecipeTypes.HAUNTING.getType(), recipeInput, level);
 
         boolean hasEnoughEnergy = energyStorage.getEnergyStored() >= 100; // FE required per tick.
         boolean hasInput = inputStack.getCount() > 0;
@@ -359,71 +405,21 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
         if(recipeOpt.isPresent() && hasInput && hasEnoughEnergy && hasFluid) {
             var recipe = recipeOpt.get().value();
 
-            if (recipe instanceof SplashingRecipe splashingRecipe) {
-                var potentialResults = splashingRecipe.getRollableResultsAsItemStacks();
+            if (recipe instanceof ProcessingRecipe<?, ?> processingRecipe) {
+                var potentialResults = processingRecipe.getRollableResultsAsItemStacks();
+                if (potentialResults.isEmpty()) return;
 
-                if(potentialResults.isEmpty()) return;
+                ItemStack targetPrimary = potentialResults.get(0);
+                ItemStack targetSecondary = potentialResults.size() > 1 ? potentialResults.get(1) : ItemStack.EMPTY;
 
-                if(
-                    outputOne.getCount() > 0 && outputOne.getItem() != potentialResults.get(0).getItem()
-                    || outputTwo.getCount() > 0 && (potentialResults.size() < 2 || outputTwo.getItem() != potentialResults.get(1).getItem())
-                ) return;
+                if (outputOne.getCount() > 0 && !ItemStack.isSameItemSameComponents(outputOne, targetPrimary)) return;
+                if (outputTwo.getCount() > 0 && (targetSecondary.isEmpty() || !ItemStack.isSameItemSameComponents(outputTwo, targetSecondary))) return;
 
                 handleMachineOperationRunning();
 
-                if(progress >= 100) {
-
-                    if(upgrades.contains(UpgradeItem.UpgradeType.DETERMINISTIC)) {
-                        ItemStack ResultOne = potentialResults.get(0);
-                        ItemStack ResultTwo = potentialResults.get(1);
-
-                        if (!outputOne.isEmpty()) {
-                            outputOne.grow(ResultOne.getCount());
-                        } else {
-                            ItemStack newOutputOne = new ItemStack(ResultOne.getItem(), ResultOne.getCount());
-                            this.inventory.insertItem(OUTPUT_SLOT_1, newOutputOne, false);
-                        }
-
-                        if (!outputTwo.isEmpty()) {
-                            outputTwo.grow(ResultTwo.getCount());
-                        } else {
-                            ItemStack newOutputTwo = new ItemStack(ResultTwo.getItem(), ResultTwo.getCount());
-                            this.inventory.insertItem(OUTPUT_SLOT_2, newOutputTwo, false);
-                        }
-                    } else {
-                        List<ItemStack> outputs = splashingRecipe.rollResults(this.level.getRandom());
-                        for (ItemStack o : outputs) {
-                            if (o.getItem() == potentialResults.get(0).getItem()) {
-                                if (!outputOne.isEmpty()) {
-                                    outputOne.grow(o.getCount());
-                                } else {
-                                    ItemStack newOutputOne = new ItemStack(o.getItem(), o.getCount());
-                                    this.inventory.insertItem(OUTPUT_SLOT_1, newOutputOne, false);
-                                }
-                            } else {
-                                if (!outputTwo.isEmpty()) {
-                                    outputTwo.grow(o.getCount());
-                                } else {
-                                    ItemStack newOutputTwo = new ItemStack(o.getItem(), o.getCount());
-                                    this.inventory.insertItem(OUTPUT_SLOT_2, newOutputTwo, false);
-                                }
-                            }
-                        }
-                    }
-
-
-                    inputStack.shrink(1);
-                    if (progress >= 100) {
-                        // Retain overflow progress so leftover fraction isn't wasted
-                        progress -= 100;
-                    } else {
-                        progress = 0;
-                    }
-                    progress = 0;
-                    this.setChangedAndUpdate();
-                    ejectOutput();
+                if (progress >= 100) {
+                    rollCreateRecipe(processingRecipe, targetPrimary, targetSecondary, inputStack);
                 }
-
             }
 
             if (recipe instanceof BlastingRecipe blastingRecipe) {
@@ -583,6 +579,12 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
         tag.putInt("Energy", this.energyStorage.getEnergyStored());
         tag.put("FluidTank", this.fluidTank.writeToNBT(registries, new CompoundTag()));
         tag.putBoolean("AutoEjectFluid", this.autoEjectFluid);
+
+        ListTag listTag = new ListTag();
+        for (UpgradeItem.UpgradeType upgrade : upgrades) {
+            listTag.add(StringTag.valueOf(upgrade.name()));
+        }
+        tag.put("Upgrades", listTag);
     }
 
     @Override
@@ -602,6 +604,14 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
 
         if (tag.contains("AutoEjectFluid")) {
             this.autoEjectFluid = tag.getBoolean("AutoEjectFluid");
+        }
+
+        if (tag.contains("Upgrades", Tag.TAG_LIST)) {
+            for (Tag t : tag.getList("Upgrades", Tag.TAG_STRING)) {
+                try {
+                    upgrades.add(UpgradeItem.UpgradeType.valueOf(t.getAsString()));
+                } catch (IllegalArgumentException ignored) {}
+            }
         }
     }
 
@@ -651,6 +661,9 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
             stack.shrink(1);
         }
         upgrades.add(upgrade);
+
+        this.updateFluidMenu = true;
+
         return true;
     }
 
@@ -670,6 +683,8 @@ public class FluidiserBlockEntity extends BlockEntity implements MenuProvider {
             }
         }
         upgrades.clear();
+
+        this.updateFluidMenu = true;
     }
 
 }
