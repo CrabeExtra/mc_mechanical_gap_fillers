@@ -2,7 +2,7 @@
   "itemGroup.mechanicalgapfillers": "Mechanical Gap Fillers",
   "block.mechanicalgapfillers.fluidiser": "Fluidiser",
   "gui.mechanicalgapfillers.fluidiser.fluidTank.empty": "Empty",
-  "gui.mechanicalgapfillers.fluidiser.fluidTank.info": "Add water or lava",
+  "gui.mechanicalgapfillers.fluidiser.fluidTank.info": "Add water, soul water or lava",
   "gui.mechanicalgapfillers.fluidiser.energySlot.info": "Add redstone to power",
   "item.mechanicalgapfillers.speed_upgrade": "MGF Speed Upgrade",
   "item.mechanicalgapfillers.deterministic_upgrade":"MGF Deterministic Upgrade",
